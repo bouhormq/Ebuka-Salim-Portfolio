@@ -14,8 +14,8 @@
         href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
         rel="stylesheet">
 
-    <link lang='sass' rel="stylesheet" href="./static/styles/main.css">
-    <link rel='icon' href='./static/img/favicon.ico' type='image/x-icon' />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link rel='icon' href="{{ url_for('static', filename='img/favicon.ico') }}" type='image/x-icon' />
     <title>{{ title }}</title>
 </head>
 
@@ -24,7 +24,7 @@
         <div class="nav-content">
             <a href="/">
                 <div class="nav-logo">
-                    <img src="./static/img/logo.svg" />
+                    <img src="{{ url_for('static', filename='img/logo.svg') }}" />
                 </div>
             </a>
         </div>
@@ -32,9 +32,62 @@
 
     <div class="profile">
         <div id="profile-picture" class="profile-picture">
-            <img src="./static/img/logo.jpg">
+            <img src="{{ url_for('static', filename='img/logo.jpg') }}">
+            <div class="profile-picture-overlay">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+            </div>
         </div>
         <h1>{{ title }}</h1>
+        <input type="file" id="profile-picture-input" accept="image/*" style="display: none;">
     </div>
+
+    <script>
+        const profilePictureContainer = document.getElementById('profile-picture');
+        const profilePictureInput = document.getElementById('profile-picture-input');
+        const profileImage = profilePictureContainer.querySelector('img');
+
+        profilePictureContainer.addEventListener('click', () => {
+            profilePictureInput.click();
+        });
+
+        profilePictureInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    profileImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                const formData = new FormData();
+                formData.append('profile_picture', file);
+
+                fetch('/upload', {
+                    method: 'POST', // Corrected method to POST
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log("Upload successful");
+                        // Optionally, you can force a reload of the image to avoid cache issues
+                        const newImageUrl = `{{ url_for('static', filename='img/logo.jpg') }}?${new Date().getTime()}`;
+                        profileImage.src = newImageUrl;
+                        console.log(`Image source updated to: ${newImageUrl}`);
+                    } else {
+                        console.error('Upload failed:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        });
+    </script>
 </body>
+
 </html>
