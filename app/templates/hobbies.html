@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Hobbies{% endblock %}
+
+{% block content %}
+<div class="info-section">
+    <h2>Hobbies</h2>
+    <div class="hobbies-container">
+        {% for hobby in hobbies %}
+        <div class="hobby-item">
+            <img src="{{ hobby.image }}" alt="{{ hobby.name }}">
+            <h3>{{ hobby.name }}</h3>
+            <p>{{ hobby.description }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
