@@ -3,6 +3,9 @@
 {% block title %}Travel{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
 <div class="info-section">
     <h2>Cool Locations I've Visited</h2>
     <div class="location-items">
@@ -12,8 +15,28 @@
             <li>New York, USA</li>
         </ul>
     </div>
-    <div style="display: flex; justify-content: center; margin-top: 20px;">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4983.382188821465!2d2.2919063761197274!3d48.858373600708155!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e66e2964e34e2d%3A0x8ddca9ee380ef7e0!2sEiffel%20Tower!5e1!3m2!1sen!2sie!4v1750428249916!5m2!1sen!2sie" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>
+    <div id="map" style="height: 400px; margin-top: 20px;"></div>
 </div>
+<script>
+    // Coordinates for the locations
+    const locations = [
+        { name: "Paris, France", coords: [48.8566, 2.3522] },
+        { name: "Tokyo, Japan", coords: [35.6895, 139.6917] },
+        { name: "New York, USA", coords: [40.7128, -74.0060] }
+    ];
+
+    // Initialize the map centered between the locations
+    const map = L.map('map').setView([41.9028, 12.4964], 2);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add markers for each location
+    locations.forEach(loc => {
+        L.marker(loc.coords).addTo(map)
+            .bindPopup(loc.name);
+    });
+</script>
 {% endblock %}
