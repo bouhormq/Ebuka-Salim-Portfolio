@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Education{% endblock %}
+
+{% block content %}
+<div class="info-section">
+    <h2>Education</h2>
+    {% for edu in education_history %}
+    <div class="info-item">
+        <h3>{{ edu.degree }}</h3>
+        <p>{{ edu.institution }}, {{ edu.year }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
