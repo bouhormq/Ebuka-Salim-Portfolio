@@ -5,6 +5,15 @@
 {% block content %}
 <div class="info-section">
     <h2>Work Experience</h2>
+    <form method="POST" action="{{ url_for('add_work') }}">
+        <input type="text" name="job_title" placeholder="Job Title" required style="height:23px; margin: 0px 0px 7px;">
+        <b style="color: white;">at</b> 
+        <input type="text" name="company" placeholder="Company" required style="height:23px; margin: 0px 0px 7px;"><br/>
+        <b style="color: white;">from</b>  <input type="date" name="date1" placeholder="Dates" required style="margin: 0px 0px 7px;"><b style="color: white;"> -> to </b><input type="date" name="date2" placeholder="Dates" required><br/>
+        <textarea name="description" placeholder="Description" required></textarea><br/>
+        <button type="submit">Add Work Experience</button>
+    </form>
+    <h2></h2>
     {% for work in work_experiences %}
     <div class="info-item">
         <h3>{{ work.job_title }} at {{ work.company }}</h3>
