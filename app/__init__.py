@@ -33,7 +33,7 @@ education_history = [
     }
 ]
 
-HOBBIES_DATA = [
+hobbies_data = [
     {
         "name": "Photography",
         "image": 'img/logo.jpg',
@@ -112,13 +112,33 @@ def add_education():
 def hobbies():
     # We need to generate the image URLs dynamically
     hobbies_with_urls = []
-    for hobby in HOBBIES_DATA:
+    for hobby in hobbies_data:
         hobbies_with_urls.append({
             'name': hobby['name'],
             'image': url_for('static', filename=hobby['image']),
             'description': hobby['description']
         })
     return render_template('hobbies.html', title="Hobbies", url=os.getenv("URL"), hobbies=hobbies_with_urls)
+
+@app.route('/add_hobby', methods=['POST'])
+def add_hobby():
+    name = request.form['name']
+    image_file = request.files['image']
+
+    safe_name = "".join(c for c in name if c.isalnum() or c in (' ', '_', '-')).rstrip().replace(' ', '_')
+    filename = f"{safe_name}.jpg"
+    upload_folder = os.path.join(app.static_folder, 'img')
+    os.makedirs(upload_folder, exist_ok=True)
+    save_path = os.path.join(upload_folder, filename)
+    image_file.save(save_path)
+
+    hobbies_data.append({
+        'name': name,
+        'image': f'img/{filename}',
+        'description': request.form['description']
+    })
+
+    return redirect(url_for('hobbies'))
 
 @app.route('/travel')
 def travel():

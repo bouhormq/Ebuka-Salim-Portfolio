@@ -5,6 +5,13 @@
 {% block content %}
 <div class="info-section">
     <h2>Hobbies</h2>
+    <form method="POST" action="{{ url_for('add_hobby') }}" enctype="multipart/form-data">
+        <b style="color: white;">Upload Image</b> <input type="file" name="image" id="test" required style="margin: 0px 0px 7px;"><br>
+        <input type="text" name="name" placeholder="Name" required style="height:23px; margin: 0px 0px 7px;"><br/>
+        <input type="text" name="description" placeholder="Description" required style="height:23px; margin: 0px 0px 7px;"><br/>
+        <button type="submit">Add Hobby</button>
+    </form>
+    <h2></h2>
     <div class="hobbies-container">
         {% for hobby in hobbies %}
         <div class="hobby-item">
