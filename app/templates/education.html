@@ -5,10 +5,18 @@
 {% block content %}
 <div class="info-section">
     <h2>Education</h2>
+    <form method="POST" action="{{ url_for('add_education') }}">
+        <input type="text" name="degree" placeholder="Degree" required style="height:23px; margin: 0px 0px 7px;"></br>
+        <input type="text" name="institution" placeholder="Institution" required style="height:23px; margin: 0px 0px 7px;"><br/>
+        <b style="color: white;"> Currently attending? </b><input type="checkbox" name="currently_attending"></br>
+        <b style="color: white;">from </b><input type="date" name="year1" placeholder="Dates" required style="margin: 0px 0px 7px;"><b style="color: white;"> -> to </b><input type="date" name="year2" placeholder="Dates" required><br/>
+        <button type="submit">Add Education</button>
+    </form>
+
     {% for edu in education_history %}
     <div class="info-item">
         <h3>{{ edu.degree }}</h3>
-        <p>{{ edu.institution }}, {{ edu.year }}</p>
+        <p>{{ edu.institution }}<br>{{ edu.years }}</p>
     </div>
     {% endfor %}
 </div>
