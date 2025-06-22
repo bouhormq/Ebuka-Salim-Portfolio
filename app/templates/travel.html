@@ -3,12 +3,42 @@
 {% block title %}Travel{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
 <div class="info-section">
     <h2>Cool Locations I've Visited</h2>
-    <ul>
-        <li>Paris, France</li>
-        <li>Tokyo, Japan</li>
-        <li>New York, USA</li>
-    </ul>
+    <p>Click anywhere on the map to add a location. Click on markers to read their notes.</p>
+    <div id="map" style="height: 400px; margin-top: 20px;"></div>
 </div>
+<script>
+    
+    const map = L.map('map').setView([41.9028, 12.4964], 2);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const flaskMarkers = JSON.parse('{{ markers|tojson|safe }}');
+    flaskMarkers.forEach(m => {
+        L.marker([m.lat, m.lng]).addTo(map).bindPopup(m.note);
+    });
+
+    map.on('click', function(e) {
+        const note = prompt("Write a note about what you did.");
+        if (note) {
+            L.marker(e.latlng).addTo(map).bindPopup(note);
+
+            fetch('/add_marker', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    lat: e.latlng.lat,
+                    lng: e.latlng.lng,
+                    note: note
+                })
+            });
+        }
+    });
+</script>
 {% endblock %}

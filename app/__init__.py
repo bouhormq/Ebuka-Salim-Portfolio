@@ -142,7 +142,7 @@ def add_hobby():
 
 @app.route('/travel')
 def travel():
-    return render_template('travel.html', title="Travel", url=os.getenv("URL"))
+    return render_template('travel.html', title="Travel", url=os.getenv("URL"), markers=markers)
 
 
 @app.route('/upload', methods=['POST'])

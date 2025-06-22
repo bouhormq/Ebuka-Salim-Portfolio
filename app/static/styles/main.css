@@ -136,6 +136,10 @@ body {
     border-radius: 8px;
 }
 
+.info-section p {
+    color: white;
+}
+
 .info-section h2 {
     color: white;
     border-bottom: 2px solid #444;
@@ -195,4 +199,8 @@ body {
     color: white;
     font-size: 50px;
     font-weight: 700;
+}
+
+.location-items {
+    color: white;
 }
