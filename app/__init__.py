@@ -29,7 +29,7 @@ education_history = [
     {
         "degree": "Bachelor of Science in Computer Science",
         "institution": "University of Technology",
-        "year": "2021"
+        "years": "2021 - 2025"
     }
 ]
 
@@ -94,6 +94,19 @@ def add_work():
 @app.route('/education')
 def education():
     return render_template('education.html', title="Education", url=os.getenv("URL"), education_history=education_history)
+
+@app.route('/add_education', methods=['POST'])
+def add_education():
+    
+    year1 = datetime.strptime(request.form['year1'], "%Y-%m-%d").strftime("%Y")
+    year2 = 'Present' if request.form.get('currently_attending') else datetime.strptime(request.form['year2'], "%Y-%m-%d").strftime("%Y")
+
+    education_history.append({
+        'degree': request.form['degree'],
+        'institution': request.form['institution'],
+        'years': year1 + ' - ' + year2
+    })
+    return redirect(url_for('education'))
 
 @app.route('/hobbies')
 def hobbies():
