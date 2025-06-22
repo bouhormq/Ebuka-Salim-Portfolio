@@ -8,35 +8,37 @@
 
 <div class="info-section">
     <h2>Cool Locations I've Visited</h2>
-    <div class="location-items">
-        <ul>
-            <li>Paris, France</li>
-            <li>Tokyo, Japan</li>
-            <li>New York, USA</li>
-        </ul>
-    </div>
+    <p>Click anywhere on the map to add a location. Click on markers to read their notes.</p>
     <div id="map" style="height: 400px; margin-top: 20px;"></div>
 </div>
 <script>
-    // Coordinates for the locations
-    const locations = [
-        { name: "Paris, France", coords: [48.8566, 2.3522] },
-        { name: "Tokyo, Japan", coords: [35.6895, 139.6917] },
-        { name: "New York, USA", coords: [40.7128, -74.0060] }
-    ];
-
-    // Initialize the map centered between the locations
+    
     const map = L.map('map').setView([41.9028, 12.4964], 2);
 
-    // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Add markers for each location
-    locations.forEach(loc => {
-        L.marker(loc.coords).addTo(map)
-            .bindPopup(loc.name);
+    const flaskMarkers = JSON.parse('{{ markers|tojson|safe }}');
+    flaskMarkers.forEach(m => {
+        L.marker([m.lat, m.lng]).addTo(map).bindPopup(m.note);
+    });
+
+    map.on('click', function(e) {
+        const note = prompt("Write a note about what you did.");
+        if (note) {
+            L.marker(e.latlng).addTo(map).bindPopup(note);
+
+            fetch('/add_marker', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    lat: e.latlng.lat,
+                    lng: e.latlng.lng,
+                    note: note
+                })
+            });
+        }
     });
 </script>
 {% endblock %}

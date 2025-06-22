@@ -33,6 +33,9 @@ education_history = [
     }
 ]
 
+locations_visited = [
+]
+
 HOBBIES_DATA = [
     {
         "name": "Photography",
@@ -120,9 +123,22 @@ def hobbies():
         })
     return render_template('hobbies.html', title="Hobbies", url=os.getenv("URL"), hobbies=hobbies_with_urls)
 
+markers = []
+
+@app.route('/add_marker', methods=['POST'])
+def add_marker():
+    data = request.get_json()
+    lat = data.get('lat')
+    lng = data.get('lng')
+    note = data.get('note')
+    if lat is not None and lng is not None and note:
+        markers.append({'lat': lat, 'lng': lng, 'note': note})
+        return jsonify({'success': True})
+    return jsonify({'success': False}), 400
+
 @app.route('/travel')
 def travel():
-    return render_template('travel.html', title="Travel", url=os.getenv("URL"))
+    return render_template('travel.html', title="Travel", url=os.getenv("URL"), markers=markers)
 
 
 @app.route('/upload', methods=['POST'])
