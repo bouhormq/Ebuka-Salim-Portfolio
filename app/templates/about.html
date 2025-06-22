@@ -3,8 +3,19 @@
 {% block title %}About Me{% endblock %}
 
 {% block content %}
-<div class="info-section">
-    <h2>About Me</h2>
-    <p>This is a page about me.</p>
-</div>
+<form method="POST" action="{{ url_for('save_about') }}">
+    <div class="info-section">
+        <h2>About Me</h2>
+        <p id="about-editable" contenteditable="true" style="color: white;">
+            {{ about_me }}
+        </p>
+        <input type="hidden" name="about_me" id="about-me-hidden">
+        <button type="submit">Save</button>
+    </div>
+</form>
+<script>
+document.querySelector('form').onsubmit = function() {
+    document.getElementById('about-me-hidden').value = document.getElementById('about-editable').innerText;
+};
+</script>
 {% endblock %}
