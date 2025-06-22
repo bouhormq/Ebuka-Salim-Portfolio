@@ -8,6 +8,8 @@ load_dotenv()
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 
+about_me = "This is sample text. You can click here and replace with actual content about yourself." 
+
 work_experiences = [
     {
         "job_title": "Software Engineer",
@@ -63,7 +65,13 @@ def index():
 
 @app.route('/about')
 def about():
-    return render_template('about.html', title="About Me", url=os.getenv("URL"))
+    return render_template('about.html', title="About Me", url=os.getenv("URL"), about_me=about_me)
+
+@app.route('/save_about', methods=['POST'])
+def save_about():
+    global about_me
+    about_me = request.form['about_me']
+    return redirect(url_for('about'))
 
 @app.route('/work')
 def work():
