@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, request, jsonify, url_for
+from datetime import datetime
+from flask import Flask, render_template, request, jsonify, url_for, redirect
 from dotenv import load_dotenv
 import logging
 
@@ -67,6 +68,20 @@ def about():
 @app.route('/work')
 def work():
     return render_template('work.html', title="Work Experience", url=os.getenv("URL"), work_experiences=work_experiences)
+
+@app.route('/add_work', methods=['POST'])
+def add_work():
+    
+    date1 = datetime.strptime(request.form['date1'], "%Y-%m-%d").strftime("%b %Y")
+    date2 = datetime.strptime(request.form['date2'], "%Y-%m-%d").strftime("%b %Y")
+
+    work_experiences.append({
+        'job_title': request.form['job_title'],
+        'company': request.form['company'],
+        'dates': date1 + ' - ' + date2,
+        'description': request.form['description']
+    })
+    return redirect(url_for('work'))
 
 @app.route('/education')
 def education():
