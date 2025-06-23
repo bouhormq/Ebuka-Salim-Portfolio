@@ -3,6 +3,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, jsonify, url_for, redirect
 from dotenv import load_dotenv
 import logging
+import json
 
 load_dotenv()
 app = Flask(__name__)
@@ -142,7 +143,35 @@ def add_hobby():
 
 @app.route('/travel')
 def travel():
+    try:
+        with open('app/markers.json', 'r') as f:
+            markers = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        markers = []
     return render_template('travel.html', title="Travel", url=os.getenv("URL"), markers=markers)
+
+@app.route('/add_marker', methods=['POST'])
+def add_marker():
+    data = request.get_json()
+    if not data or 'lat' not in data or 'lng' not in data:
+        return jsonify({'error': 'Invalid data'}), 400
+    
+    try:
+        with open('app/markers.json', 'r') as f:
+            markers = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        markers = []
+
+    markers.append({
+        'lat': data['lat'],
+        'lng': data['lng'],
+        'note': data.get('note', '')
+    })
+
+    with open('app/markers.json', 'w') as f:
+        json.dump(markers, f, indent=4)
+
+    return jsonify({'success': 'Marker added'}), 201
 
 
 @app.route('/upload', methods=['POST'])
