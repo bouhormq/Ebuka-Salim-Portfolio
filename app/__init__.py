@@ -13,16 +13,57 @@ load_dotenv()
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 
-# MySQL Database connection
-mydb = MySQLDatabase(
-    os.getenv("MYSQL_DATABASE"),
-    user=os.getenv("MYSQL_USER"),
-    password=os.getenv("MYSQL_PASSWORD"),
-    host=os.getenv("MYSQL_HOST"),
-    port=3306
-)
+# Database initialization
+mydb = None
+database_connected = False
 
-print(mydb)
+# Placeholder for TimelinePost Model (will be set later)
+TimelinePost = None
+
+def init_database():
+    global mydb, database_connected, TimelinePost
+    
+    # Check if all required environment variables are present
+    required_vars = ["MYSQL_DATABASE", "MYSQL_USER", "MYSQL_PASSWORD", "MYSQL_HOST"]
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    
+    if missing_vars:
+        print(f"⚠️  Missing database environment variables: {', '.join(missing_vars)}")
+        print("⚠️  Timeline posts will not work without database connection")
+        return False
+    
+    try:
+        mydb = MySQLDatabase(
+            os.getenv("MYSQL_DATABASE"),
+            user=os.getenv("MYSQL_USER"),
+            password=os.getenv("MYSQL_PASSWORD"),
+            host=os.getenv("MYSQL_HOST"),
+            port=int(os.getenv("MYSQL_PORT", 3306))
+        )
+        
+        # Define TimelinePost Model after database is created
+        class TimelinePost(Model):
+            name = CharField()
+            email = CharField()
+            content = TextField()
+            created_at = DateTimeField(default=datetime.datetime.now)
+            
+            class Meta:
+                database = mydb
+        
+        # Make TimelinePost available globally
+        globals()['TimelinePost'] = TimelinePost
+        
+        mydb.connect()
+        mydb.create_tables([TimelinePost])
+        database_connected = True
+        print("✅ Database connected and tables created successfully")
+        return True
+    except Exception as e:
+        print(f"❌ Database connection error: {e}")
+        print("⚠️  Timeline posts will not work without database connection")
+        database_connected = False
+        return False
 
 # TimelinePost Model
 class TimelinePost(Model):
@@ -34,14 +75,8 @@ class TimelinePost(Model):
     class Meta:
         database = mydb
 
-# Connect to database and create tables
-try:
-    mydb.connect()
-    mydb.create_tables([TimelinePost])
-    print("✅ Database connected and tables created successfully")
-except Exception as e:
-    print(f"❌ Database connection error: {e}")
-    print("⚠️  Timeline posts will not work without database connection")
+# Initialize database connection
+init_database()
 
 about_me = "This is sample text. You can click here and replace with actual content about yourself." 
 
@@ -245,6 +280,9 @@ def upload_file():
 # Timeline Post API Endpoints
 @app.route('/api/timeline_post', methods=['POST'])
 def post_timeline_post():
+    if not database_connected:
+        return jsonify({'error': 'Database not available'}), 503
+    
     try:
         name = request.form['name']
         email = request.form['email']
@@ -257,6 +295,9 @@ def post_timeline_post():
 
 @app.route('/api/timeline_post', methods=['GET'])
 def get_timeline_post():
+    if not database_connected:
+        return jsonify({'error': 'Database not available', 'timeline_posts': []}), 503
+    
     try:
         return jsonify({
             'timeline_posts': [
@@ -270,6 +311,9 @@ def get_timeline_post():
 
 @app.route('/api/timeline_post/<int:post_id>', methods=['DELETE'])
 def delete_timeline_post(post_id):
+    if not database_connected:
+        return jsonify({'error': 'Database not available'}), 503
+    
     try:
         post = TimelinePost.get_by_id(post_id)
         post.delete_instance()
@@ -278,3 +322,7 @@ def delete_timeline_post(post_id):
         return jsonify({'error': f'Timeline post {post_id} not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    # For development only
+    app.run(debug=True, host='0.0.0.0', port=5000)

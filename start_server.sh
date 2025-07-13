@@ -5,12 +5,13 @@
 echo "🚀 Starting Flask Portfolio Server..."
 echo "🔧 Setting up environment..."
 
-# Navigate to project directory
-cd /Users/salim/Desktop/Ebuka-Salim-Portfolio
+# Navigate to project directory (get the directory where this script is located)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
 
 # Start server without debug mode to avoid reloader issues
 echo "📡 Starting server on port 5001..."
-/Users/salim/Desktop/Ebuka-Salim-Portfolio/.venv/bin/python -c "
+./.venv/bin/python -c "
 from app import app
 print('🌐 Server starting at http://localhost:5001')
 print('📡 API endpoints available:')
