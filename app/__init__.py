@@ -1,13 +1,47 @@
 import os
 from datetime import datetime
+import datetime
 from flask import Flask, render_template, request, jsonify, url_for, redirect
 from dotenv import load_dotenv
 import logging
 import json
+from peewee import *
+from peewee import MySQLDatabase
+from playhouse.shortcuts import model_to_dict 
 
 load_dotenv()
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
+
+# MySQL Database connection
+mydb = MySQLDatabase(
+    os.getenv("MYSQL_DATABASE"),
+    user=os.getenv("MYSQL_USER"),
+    password=os.getenv("MYSQL_PASSWORD"),
+    host=os.getenv("MYSQL_HOST"),
+    port=3306
+)
+
+print(mydb)
+
+# TimelinePost Model
+class TimelinePost(Model):
+    name = CharField()
+    email = CharField()
+    content = TextField()
+    created_at = DateTimeField(default=datetime.datetime.now)
+    
+    class Meta:
+        database = mydb
+
+# Connect to database and create tables
+try:
+    mydb.connect()
+    mydb.create_tables([TimelinePost])
+    print("✅ Database connected and tables created successfully")
+except Exception as e:
+    print(f"❌ Database connection error: {e}")
+    print("⚠️  Timeline posts will not work without database connection")
 
 about_me = "This is sample text. You can click here and replace with actual content about yourself." 
 
@@ -200,3 +234,41 @@ def upload_file():
         except Exception as e:
             app.logger.error(f"Failed to save file: {e}")
             return jsonify({'error': str(e)}), 500
+
+
+# Timeline Post API Endpoints
+@app.route('/api/timeline_post', methods=['POST'])
+def post_timeline_post():
+    try:
+        name = request.form['name']
+        email = request.form['email']
+        content = request.form['content']
+        timeline_post = TimelinePost.create(name=name, email=email, content=content)
+        return jsonify(model_to_dict(timeline_post))
+    except Exception as e:
+        app.logger.error(f"Error creating timeline post: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/timeline_post', methods=['GET'])
+def get_timeline_post():
+    try:
+        return jsonify({
+            'timeline_posts': [
+                model_to_dict(p) 
+                for p in TimelinePost.select().order_by(TimelinePost.created_at.desc())
+            ]
+        })
+    except Exception as e:
+        app.logger.error(f"Error retrieving timeline posts: {e}")
+        return jsonify({'error': str(e), 'timeline_posts': []}), 500
+
+@app.route('/api/timeline_post/<int:post_id>', methods=['DELETE'])
+def delete_timeline_post(post_id):
+    try:
+        post = TimelinePost.get_by_id(post_id)
+        post.delete_instance()
+        return jsonify({'success': f'Timeline post {post_id} deleted successfully'}), 200
+    except TimelinePost.DoesNotExist:
+        return jsonify({'error': f'Timeline post {post_id} not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

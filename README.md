@@ -1,6 +1,23 @@
-# Production Engineering - Week 1 - Portfolio Site
+# Production Engineering - Portfolio Site with Timeline API
 
-Welcome to the MLH Fellowship! During Week 1, you'll be using Flask to build a portfolio site. This site will be the foundation for activities we do in future weeks so spend time this week making it your own and reflect your personality!
+Welcome to the MLH Fellowship Portfolio! This Flask-based portfolio site now includes a full-featured timeline post API with MySQL database integration. The site showcases personal information while providing a robust backend for timeline posts with CRUD operations.
+
+## 🚀 Features
+
+### Portfolio Pages
+- ✅ **Home Page** - Landing page with profile information
+- ✅ **About** - Personal description with edit functionality
+- ✅ **Work Experience** - Professional background with add/edit features
+- ✅ **Education** - Academic history with form input
+- ✅ **Hobbies** - Personal interests with image uploads
+- ✅ **Travel** - Interactive map of visited locations
+
+### Timeline Post API
+- ✅ **REST API** for timeline posts (Create, Read, Delete)
+- ✅ **MySQL Database** integration with Peewee ORM
+- ✅ **Data Persistence** across server restarts
+- ✅ **Error Handling** and validation
+- ✅ **Automated Testing** with curl scripts
 
 ## Tasks
 
@@ -29,51 +46,223 @@ For each of these tasks, you should create an [Issue](https://docs.github.com/en
 - [x] Create a new page to display hobbies.
 - [x] Add a menu bar that dynamically displays other pages in the app
 
+### Database & API Tasks
+- [x] **MySQL Database Integration** - Connect Flask app to MySQL database using Peewee ORM
+- [x] **Timeline Post Model** - Create database model for timeline posts with fields: name, email, content, created_at
+- [x] **REST API Endpoints** - Implement GET, POST, and DELETE endpoints for timeline posts
+- [x] **API Testing** - Create automated curl testing script for all endpoints
+- [x] **Error Handling** - Add comprehensive error handling and logging
 
-## Getting Started
 
-You need to do all your progress here.
+## 🛠 Installation & Setup
 
-## Installation
+### Prerequisites
+- Python 3.11+ installed
+- MySQL server running locally
+- pip package manager
 
-Make sure you have python3 and pip installed
+### Environment Setup
 
-Create and activate virtual environment using virtualenv
+1. **Clone the repository**
 ```bash
-$ python -m venv python3-virtualenv
-$ source python3-virtualenv/bin/activate
+git clone <repository-url>
+cd Ebuka-Salim-Portfolio
 ```
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install all dependencies!
+2. **Create and activate virtual environment**
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
 
+3. **Install dependencies**
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage
-
-Create a .env file using the example.env template (make a copy using the variables inside of the template)
-
-Start flask development server
+4. **Database Configuration**
 ```bash
-$ export FLASK_ENV=development
-$ flask run
+# Copy environment template
+cp example.env .env
+
+# Edit .env file with your MySQL credentials:
+# MYSQL_HOST=localhost
+# MYSQL_USER=your_username
+# MYSQL_PASSWORD=your_password
+# MYSQL_DATABASE=your_database_name
+# URL=localhost:5001
 ```
 
-You should get a response like this in the terminal:
+5. **Database Setup**
+   - Create a MySQL database with the name specified in your `.env` file
+   - The application will automatically create the required tables on first run
+
+### Running the Application
+
+**Option 1: Using the startup script (Recommended)**
+```bash
+./start_server.sh
 ```
-❯ flask run
- * Environment: development
- * Debug mode: on
- * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+
+**Option 2: Manual start**
+```bash
+python -c "from app import app; app.run(host='0.0.0.0', port=5001)"
 ```
 
-You'll now be able to access the website at `localhost:5000` or `127.0.0.1:5000` in the browser! 
+The application will be available at: **http://localhost:5001**
 
-*Note: The portfolio site will only work on your local machine while you have it running inside of your terminal. We'll go through how to host it in the cloud in the next few weeks!* 
+### API Endpoints
 
-## Contributing
+The application provides the following REST API endpoints:
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/timeline_post` | Retrieve all timeline posts |
+| `POST` | `/api/timeline_post` | Create a new timeline post |
+| `DELETE` | `/api/timeline_post/<id>` | Delete a specific timeline post |
 
-Please make sure to update tests as appropriate.
+#### API Usage Examples
+
+**Create a timeline post:**
+```bash
+curl -X POST http://localhost:5001/api/timeline_post \
+  -d "name=John Doe" \
+  -d "email=john@example.com" \
+  -d "content=Hello World!"
+```
+
+**Get all timeline posts:**
+```bash
+curl http://localhost:5001/api/timeline_post
+```
+
+**Delete a timeline post:**
+```bash
+curl -X DELETE http://localhost:5001/api/timeline_post/1
+```
+
+## 🧪 Testing
+
+### Automated API Testing
+
+Run the comprehensive test suite to verify all API endpoints:
+
+```bash
+./curl-test.sh
+```
+
+This script will:
+- ✅ Check server connectivity
+- ✅ Test GET endpoint (retrieve posts)
+- ✅ Test POST endpoint (create posts)
+- ✅ Test DELETE endpoint (remove posts)
+- ✅ Verify data persistence
+- ✅ Clean up test data automatically
+
+### Manual Testing
+
+You can also test individual endpoints manually:
+
+```bash
+# Test server is running
+curl http://localhost:5001/api/timeline_post
+
+# Create a test post
+curl -X POST http://localhost:5001/api/timeline_post \
+  -d "name=Test User" \
+  -d "email=test@example.com" \
+  -d "content=Test message"
+
+# Delete a post (replace 1 with actual post ID)
+curl -X DELETE http://localhost:5001/api/timeline_post/1
+```
+
+## 📁 Project Structure
+
+```
+Ebuka-Salim-Portfolio/
+├── app/
+│   ├── __init__.py          # Main Flask application
+│   ├── static/              # CSS, images, and static files
+│   ├── templates/           # HTML templates
+│   └── markers.json         # Travel map markers data
+├── .venv/                   # Virtual environment
+├── start_server.sh          # Server startup script
+├── curl-test.sh            # API testing script
+├── requirements.txt         # Python dependencies
+├── example.env             # Environment template
+└── README.md               # This file
+```
+
+## 🔧 Development
+
+### Database Models
+
+**TimelinePost Model:**
+- `id` (Integer, Primary Key)
+- `name` (String, Required)
+- `email` (String, Required)
+- `content` (Text, Required)
+- `created_at` (DateTime, Auto-generated)
+
+### Adding New Features
+
+1. Create a new branch for your feature
+2. Implement your changes
+3. Test using the provided testing scripts
+4. Update documentation as needed
+5. Submit a pull request
+
+### Troubleshooting
+
+**Port 5000 in use?** 
+- macOS often uses port 5000 for AirTunes
+- The app is configured to use port 5001 instead
+- If needed, change the port in `start_server.sh`
+
+**Database connection issues?**
+- Verify MySQL is running: `brew services start mysql` (macOS)
+- Check your `.env` file credentials
+- Ensure the database exists
+
+**Import errors?**
+- Activate your virtual environment: `source .venv/bin/activate`
+- Reinstall dependencies: `pip install -r requirements.txt` 
+
+## 🤝 Contributing
+
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+
+### Development Workflow
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run tests (`./curl-test.sh`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+### Code Standards
+- Follow PEP 8 style guidelines for Python
+- Add comments for complex logic
+- Update tests when adding new API endpoints
+- Update documentation for new features
+
+## 📝 License
+
+This project is part of the MLH Fellowship program.
+
+## 🎯 Future Enhancements
+
+- [ ] Add user authentication
+- [ ] Implement timeline post editing (PUT endpoint)
+- [ ] Add pagination for timeline posts
+- [ ] Create frontend interface for timeline posts
+- [ ] Add image uploads for timeline posts
+- [ ] Implement search functionality
+- [ ] Add API rate limiting
+- [ ] Create admin dashboard
+
+---
+
+**Happy coding!** 🚀
