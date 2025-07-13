@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}Timeline{% endblock %}
+
+{% block content %}
+<div class="info-section">
+    <h2>Timeline Posts</h2>
+    
+    <!-- Timeline Post Form -->
+    <div class="timeline-form-section">
+        <h3>Share Your Thoughts</h3>
+        <form id="timeline-form" onsubmit="submitTimelinePost(event)">
+            <input type="text" name="name" id="name" placeholder="Your Name" required style="height:23px; margin: 0px 0px 7px; width: 100%;">
+            <input type="email" name="email" id="email" placeholder="Your Email" required style="height:23px; margin: 0px 0px 7px; width: 100%;">
+            <textarea name="content" id="content" placeholder="What's on your mind?" required style="width: 100%; min-height: 80px; margin: 0px 0px 7px;"></textarea>
+            <button type="submit" id="submit-btn">Post Timeline Entry</button>
+        </form>
+        <div id="form-message" style="margin-top: 10px;"></div>
+    </div>
+
+    <!-- Timeline Posts Display -->
+    <div class="timeline-posts-section">
+        <h3>Recent Posts</h3>
+        <div id="timeline-posts-container">
+            <div id="loading">Loading timeline posts...</div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline-form-section {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    backdrop-filter: blur(5px);
+}
+
+.timeline-posts-section {
+    margin-top: 20px;
+}
+
+.timeline-post {
+    background: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #007bff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    backdrop-filter: blur(5px);
+}
+
+.timeline-post h4 {
+    margin: 0 0 5px 0;
+    color: #fff;
+    font-size: 1.1em;
+}
+
+.timeline-post .meta {
+    color: #ccc;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.timeline-post .content {
+    color: #fff;
+    line-height: 1.4;
+}
+
+.timeline-form-section input,
+.timeline-form-section textarea {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.timeline-form-section input::placeholder,
+.timeline-form-section textarea::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.timeline-form-section button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.timeline-form-section button:hover {
+    background: #0056b3;
+}
+
+.timeline-form-section button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+#form-message {
+    padding: 10px;
+    border-radius: 5px;
+    display: none;
+}
+
+#form-message.success {
+    background: rgba(40, 167, 69, 0.2);
+    border: 1px solid #28a745;
+    color: #28a745;
+}
+
+#form-message.error {
+    background: rgba(220, 53, 69, 0.2);
+    border: 1px solid #dc3545;
+    color: #dc3545;
+}
+
+.no-posts {
+    text-align: center;
+    color: #ccc;
+    font-style: italic;
+    padding: 20px;
+}
+</style>
+
+<script>
+// Function to load timeline posts
+async function loadTimelinePosts() {
+    try {
+        const response = await fetch('/api/timeline_post');
+        const data = await response.json();
+        
+        const container = document.getElementById('timeline-posts-container');
+        
+        if (data.timeline_posts && data.timeline_posts.length > 0) {
+            container.innerHTML = data.timeline_posts.map(post => `
+                <div class="timeline-post">
+                    <h4>${escapeHtml(post.name)}</h4>
+                    <div class="meta">
+                        ${escapeHtml(post.email)} • ${formatDate(post.created_at)}
+                    </div>
+                    <div class="content">${escapeHtml(post.content)}</div>
+                </div>
+            `).join('');
+        } else {
+            container.innerHTML = '<div class="no-posts">No timeline posts yet. Be the first to share!</div>';
+        }
+    } catch (error) {
+        console.error('Error loading timeline posts:', error);
+        document.getElementById('timeline-posts-container').innerHTML = 
+            '<div class="no-posts">Error loading timeline posts. Please try again later.</div>';
+    }
+}
+
+// Function to submit new timeline post
+async function submitTimelinePost(event) {
+    event.preventDefault();
+    
+    const submitBtn = document.getElementById('submit-btn');
+    const messageDiv = document.getElementById('form-message');
+    const form = document.getElementById('timeline-form');
+    
+    // Disable submit button
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Posting...';
+    
+    // Hide previous messages
+    messageDiv.style.display = 'none';
+    
+    try {
+        const formData = new FormData(form);
+        
+        const response = await fetch('/api/timeline_post', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            
+            // Show success message
+            messageDiv.className = 'success';
+            messageDiv.textContent = 'Timeline post created successfully!';
+            messageDiv.style.display = 'block';
+            
+            // Clear form
+            form.reset();
+            
+            // Reload timeline posts
+            await loadTimelinePosts();
+            
+            // Hide message after 3 seconds
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+        } else {
+            throw new Error('Failed to create timeline post');
+        }
+    } catch (error) {
+        console.error('Error creating timeline post:', error);
+        
+        // Show error message
+        messageDiv.className = 'error';
+        messageDiv.textContent = 'Failed to create timeline post. Please try again.';
+        messageDiv.style.display = 'block';
+    } finally {
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Post Timeline Entry';
+    }
+}
+
+// Utility functions
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+}
+
+// Load timeline posts when page loads
+document.addEventListener('DOMContentLoaded', loadTimelinePosts);
+</script>
+{% endblock %}

@@ -88,6 +88,7 @@ NAV_PAGES = [
     {'endpoint': 'education', 'name': 'Education'},
     {'endpoint': 'hobbies', 'name': 'Hobbies'},
     {'endpoint': 'travel', 'name': 'Travel'},
+    {'endpoint': 'timeline', 'name': 'Timeline'},
 ]
 
 @app.context_processor
@@ -206,6 +207,11 @@ def add_marker():
         json.dump(markers, f, indent=4)
 
     return jsonify({'success': 'Marker added'}), 201
+
+
+@app.route('/timeline')
+def timeline():
+    return render_template('timeline.html', title="Timeline", url=os.getenv("URL"))
 
 
 @app.route('/upload', methods=['POST'])
