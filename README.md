@@ -215,9 +215,7 @@ Ebuka-Salim-Portfolio/
 
 ### Troubleshooting
 
-**Port 5000 in use?** 
-- macOS often uses port 5000 for AirTunes
-- The app is configured to use port 5001 instead
+**Port 5001 in use?** 
 - If needed, change the port in `start_server.sh`
 
 **Database connection issues?**
