@@ -36,12 +36,25 @@ class TimelinePost(Model):
 
 # Connect to database and create tables
 try:
+    if not mydb.is_closed():
+        mydb.close()
     mydb.connect()
     mydb.create_tables([TimelinePost])
     print("✅ Database connected and tables created successfully")
 except Exception as e:
     print(f"❌ Database connection error: {e}")
     print("⚠️  Timeline posts will not work without database connection")
+
+# Database connection handlers
+@app.before_request
+def before_request():
+    if mydb.is_closed():
+        mydb.connect()
+
+@app.teardown_request
+def teardown_request(exception):
+    if not mydb.is_closed():
+        mydb.close()
 
 about_me = "This is sample text. You can click here and replace with actual content about yourself." 
 
