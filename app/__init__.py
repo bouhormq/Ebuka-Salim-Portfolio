@@ -8,6 +8,7 @@ import json
 from peewee import *
 from peewee import MySQLDatabase
 from playhouse.shortcuts import model_to_dict 
+import re
 
 load_dotenv()
 app = Flask(__name__)
@@ -33,13 +34,17 @@ def init_database():
         return False
     
     try:
-        mydb = MySQLDatabase(
-            os.getenv("MYSQL_DATABASE"),
-            user=os.getenv("MYSQL_USER"),
-            password=os.getenv("MYSQL_PASSWORD"),
-            host=os.getenv("MYSQL_HOST"),
-            port=int(os.getenv("MYSQL_PORT", 3306))
-        )
+        if os.getenv("TESTING") == "true":
+            print("Running in test mode")
+            mydb = SqliteDatabase('file:memory?mode=memory&cache=shared', uri=True)
+        else:
+            mydb = MySQLDatabase(
+                os.getenv("MYSQL_DATABASE"),
+                user=os.getenv("MYSQL_USER"),
+                password=os.getenv("MYSQL_PASSWORD"),
+                host=os.getenv("MYSQL_HOST"),
+                port=int(os.getenv("MYSQL_PORT", 3306))
+            )
         
         # Define TimelinePost Model after database is created
         class TimelinePost(Model):
@@ -285,13 +290,32 @@ def post_timeline_post():
     
     try:
         name = request.form['name']
-        email = request.form['email']
-        content = request.form['content']
-        timeline_post = TimelinePost.create(name=name, email=email, content=content)
-        return jsonify(model_to_dict(timeline_post))
+        if name.strip() == "":
+            return "Invalid name", 400
     except Exception as e:
         app.logger.error(f"Error creating timeline post: {e}")
-        return jsonify({'error': str(e)}), 500
+        return "Invalid name", 400
+    
+    try:
+        email = request.form['email']
+        email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        if not re.match(email_regex, email):
+            return "Invalid email format", 400
+    except Exception as e:
+        app.logger.error(f"Error creating timeline post: {e}")
+        return "Invalid email", 400
+    
+    try:
+        content = request.form['content']
+        if content.strip() == "":
+            return "Invalid content", 400
+    except Exception as e:
+        app.logger.error(f"Error creating timeline post: {e}")
+        return "Invalid content", 400
+        
+    timeline_post = TimelinePost.create(name=name, email=email, content=content)
+    return jsonify(model_to_dict(timeline_post))
+    
 
 @app.route('/api/timeline_post', methods=['GET'])
 def get_timeline_post():
