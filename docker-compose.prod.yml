@@ -9,7 +9,8 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
   mysql:
     container_name: mysql
@@ -19,6 +20,11 @@ services:
       - .env
     volumes:
       - mydatabase:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--user=root", "--password=${MYSQL_ROOT_PASSWORD}"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
 
   nginx:
     container_name: nginx 
