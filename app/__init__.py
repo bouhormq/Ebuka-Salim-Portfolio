@@ -24,28 +24,30 @@ TimelinePost = None
 def init_database():
     global mydb, database_connected, TimelinePost
     
-    # Check if all required environment variables are present
-    required_vars = ["MYSQL_DATABASE", "MYSQL_USER", "MYSQL_PASSWORD", "MYSQL_HOST"]
-    missing_vars = [var for var in required_vars if not os.getenv(var)]
-    
-    if missing_vars:
-        print(f"⚠️  Missing database environment variables: {', '.join(missing_vars)}")
-        print("⚠️  Timeline posts will not work without database connection")
-        return False
-    
-    try:
-        if os.getenv("TESTING") == "true":
-            print("Running in test mode")
-            mydb = SqliteDatabase('file:memory?mode=memory&cache=shared', uri=True)
-        else:
-            mydb = MySQLDatabase(
-                os.getenv("MYSQL_DATABASE"),
-                user=os.getenv("MYSQL_USER"),
-                password=os.getenv("MYSQL_PASSWORD"),
-                host=os.getenv("MYSQL_HOST"),
-                port=int(os.getenv("MYSQL_PORT", 3306))
-            )
+    # Check for testing mode first
+    if os.getenv("TESTING") == "true":
+        print("Running in test mode")
+        mydb = SqliteDatabase('file:memory?mode=memory&cache=shared', uri=True)
+    else:
+        # Check if all required environment variables are present for production
+        required_vars = ["MYSQL_DATABASE", "MYSQL_USER", "MYSQL_PASSWORD", "MYSQL_HOST"]
+        missing_vars = [var for var in required_vars if not os.getenv(var)]
         
+        if missing_vars:
+            print(f"⚠️  Missing database environment variables: {', '.join(missing_vars)}")
+            print("⚠️  Timeline posts will not work without database connection")
+            database_connected = False
+            return False
+        
+        mydb = MySQLDatabase(
+            os.getenv("MYSQL_DATABASE"),
+            user=os.getenv("MYSQL_USER"),
+            password=os.getenv("MYSQL_PASSWORD"),
+            host=os.getenv("MYSQL_HOST"),
+            port=int(os.getenv("MYSQL_PORT", 3306))
+        )
+
+    try:
         # Define TimelinePost Model after database is created
         class TimelinePost(Model):
             name = CharField()
