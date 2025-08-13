@@ -1,2 +1,4 @@
 #!/bin/bash
-$PWD/python3-virtualenv/bin/python -m unittest discover -v tests/
+
+# Run tests inside a temporary Docker container
+docker compose -f docker-compose.prod.yml run --rm -e TESTING=true myportfolio python -m unittest discover -v tests/
