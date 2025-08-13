@@ -72,16 +72,6 @@ def init_database():
         database_connected = False
         return False
 
-# TimelinePost Model
-class TimelinePost(Model):
-    name = CharField()
-    email = CharField()
-    content = TextField()
-    created_at = DateTimeField(default=datetime.datetime.now)
-    
-    class Meta:
-        database = mydb
-
 # Initialize database connection
 init_database()
 
