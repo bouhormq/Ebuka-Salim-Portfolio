@@ -7,14 +7,15 @@ on:
   workflow_dispatch:
 jobs:
   deploy:
-    name: "Deploy to VPS" 
-    runs-on: ubuntu-latest 
+    name: "Deploy to VPS"
+    runs-on: ubuntu-latest
     steps:
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy-key.pem 
-          chmod 600 ~/.ssh/deploy-key.pem 
+          chmod 700 ~/.ssh/   # Add this line to set the correct permissions for the directory
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy-key.pem
+          chmod 600 ~/.ssh/deploy-key.pem
           cat >> ~/.ssh/config <<END
           Host my-vps
             HostName $SSH_IP
