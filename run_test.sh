@@ -14,4 +14,4 @@ echo "Running tests..."
 # Set the TESTING environment variable to true and run the tests
 TESTING=true python -m unittest discover -v tests/
 
-echo "Tests completed successfully."
+echo "Tests completed successfully!"
