@@ -2,11 +2,24 @@ import unittest
 import os
 os.environ['TESTING'] = 'true'
 
-from app import app
+from app import app, init_database, mydb as app_mydb
 
 class AppTestCase(unittest.TestCase):
     def setUp(self):
+        # Set up a new app instance for each test
+        os.environ['TESTING'] = 'true'
+        global mydb
+        mydb = app_mydb
         self.client = app.test_client()
+        init_database()
+
+    def tearDown(self):
+        # Drop all tables to ensure a clean state for the next test
+        from app import TimelinePost
+        mydb.drop_tables([TimelinePost])
+        # Close the database connection after each test
+        if not mydb.is_closed():
+            mydb.close()
 
     def test_home(self):
         response = self.client.get("/")
