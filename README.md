@@ -1,6 +1,6 @@
 # Production Engineering - Portfolio Site with Timeline API
 
-Welcome to the MLH Fellowship Portfolio! This Flask-based portfolio site now includes a full-featured timeline post API with MySQL database integration. The site showcases personal information while providing a robust backend for timeline posts with CRUD operations.
+Welcome to the MLH Fellowship Portfolio! This Flask-based portfolio site now includes a full-featured timeline post API with MySQL database integration. The site showcases personal information while providing a robust backend for timeline posts with CRUD operations
 
 ## 🚀 Features
 
